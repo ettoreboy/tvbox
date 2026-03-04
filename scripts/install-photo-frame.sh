@@ -10,7 +10,7 @@ LOCALE_MAP() {
 show_help() {
   cat << 'HELP'
 Usage:
-  ./install-photo-frame.sh [OPTIONS] [HOST] [USER] [PASSWORD]
+  ./scripts/install-photo-frame.sh [OPTIONS] [HOST] [USER] [PASSWORD]
   Or use env: RASP_HOST, RASP_USER, RASP_PASS
 
 Options:
@@ -18,8 +18,8 @@ Options:
   -l, --language CODE     Picframe locale (default: en). Codes: it, en, de, fr, es, pt, nl
 
 Examples:
-  ./install-photo-frame.sh --language it 192.168.1.10 pi mypassword
-  RASP_HOST=pi.local RASP_USER=pi RASP_PASS=secret ./install-photo-frame.sh -l it
+  ./scripts/install-photo-frame.sh --language it 192.168.1.10 pi mypassword
+  RASP_HOST=pi.local RASP_USER=pi RASP_PASS=secret ./scripts/install-photo-frame.sh -l it
 HELP
 }
 

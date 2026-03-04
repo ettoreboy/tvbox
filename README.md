@@ -79,8 +79,11 @@ Adds a web UI to upload/manage files (port 8080). First user is created with the
 | **Samba** (Mac: Connect to Server) | `smb://<RASP_HOST>` |
 | **Photos folder** | Directory **Pictures** in the shared home or in FileBrowser |
 
-Photos placed in the **Pictures** folder (via FileBrowser or Samba) appear in the slideshow on the TV.  
-You can give end users a simple instruction sheet (see `docs/COME-AGGIUNGERE-FOTO.md`) after replacing placeholders with your host and credentials.
+Photos placed in the **Pictures** folder (via FileBrowser or Samba) appear in the slideshow on the TV.
+
+**Docs for end users (replace placeholders with your host/user/password):**
+- **Adding photos:** [English](docs/adding-photos.md) · [Italiano](docs/come-aggiungere-foto.md)
+- **How it works (Picframe, FileBrowser, folders):** [English](docs/how-it-works.md) · [Italiano](docs/come-funziona.md)
 
 ## Credits and thanks
 
@@ -97,19 +100,23 @@ This setup uses and builds on the following projects:
 | Path | Purpose |
 |------|--------|
 | `README.md` | This file – overview, usage, credits |
+| `LICENSE` | MIT license |
+| `SECURITY.md` | How to report security issues |
+| `CONTRIBUTING.md` | How to contribute (issues and pull requests) |
 | `scripts/setup-raspberry.sh` | Debian update, locale fix, set language (`-l it` etc.) |
 | `scripts/install-photo-frame.sh` | Installs Picframe, Samba, LightDM autologin, nightly apt; `-l` for locale |
 | `scripts/install-filebrowser.sh` | Installs FileBrowser (web file manager) |
-| `docs/raspberry-screensaver-plan.md` | Planning notes and options (photos-only, no video) |
-| `docs/COME-AGGIUNGERE-FOTO.md` | **Template** instructions for end users (replace placeholders) |
-| `CONTRIBUTING.md` | How to contribute (issues and pull requests) |
-| `scripts/setup-github.sh` | Apply repo settings with \`gh\` (disable wiki/projects, protect \`main\`) |
+| `docs/adding-photos.md` | How to add photos – **English** (template: replace placeholders) |
+| `docs/come-aggiungere-foto.md` | Come aggiungere foto – **Italiano** (template: sostituisci i segnaposto) |
+| `docs/how-it-works.md` | How Picframe + FileBrowser work – **English** |
+| `docs/come-funziona.md` | Come funzionano Picframe + FileBrowser – **Italiano** |
+| `docs/github-setup.md` | Repo settings (branch protection, no wiki/projects) |
 | `.env.example` | Env template – copy to `.env` and fill in |
 
 ## Contributing
 
-We use **issues** for bugs and ideas and **pull requests** for changes. To apply repo settings (disable wiki, protect `main`, require PRs), run from repo root: `./scripts/setup-github.sh` (requires [gh](https://cli.github.com/) auth). See [CONTRIBUTING.md](CONTRIBUTING.md).
+We use **issues** for bugs and ideas and **pull requests** for changes. Pushes to `main` go through PRs (branch protected). See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-Scripts and docs in this repository are provided as-is. Use of third-party software (Picframe, FileBrowser, etc.) is subject to their respective licenses.
+This repository is licensed under the [MIT License](LICENSE). Third-party software (Picframe, FileBrowser, etc.) is subject to their respective licenses.

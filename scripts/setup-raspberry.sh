@@ -20,7 +20,7 @@ LOCALE_MAP() {
 show_help() {
   cat << 'HELP'
 Usage:
-  ./setup-raspberry.sh [OPTIONS] [HOST] [USER] [PASSWORD]
+  ./scripts/setup-raspberry.sh [OPTIONS] [HOST] [USER] [PASSWORD]
   Or use env: RASP_HOST, RASP_USER, RASP_PASS
 
 Options:
@@ -29,8 +29,8 @@ Options:
                           Codes: it, en, de, fr, es, pt, nl
 
 Examples:
-  ./setup-raspberry.sh --language it 192.168.1.10 pi mypassword
-  RASP_HOST=pi.local RASP_USER=pi RASP_PASS=secret ./setup-raspberry.sh -l it
+  ./scripts/setup-raspberry.sh --language it 192.168.1.10 pi mypassword
+  RASP_HOST=pi.local RASP_USER=pi RASP_PASS=secret ./scripts/setup-raspberry.sh -l it
 HELP
 }
 

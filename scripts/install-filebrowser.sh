@@ -6,15 +6,15 @@ set -e
 show_help() {
   cat << 'HELP'
 Usage:
-  ./install-filebrowser.sh [OPTIONS] [HOST] [USER] [PASSWORD]
+  ./scripts/install-filebrowser.sh [OPTIONS] [HOST] [USER] [PASSWORD]
   Or use env: RASP_HOST, RASP_USER, RASP_PASS
 
 Options:
   -h, --help    Show this help
 
 Examples:
-  ./install-filebrowser.sh 192.168.1.10 pi mypassword
-  RASP_HOST=pi.local RASP_USER=pi RASP_PASS=secret ./install-filebrowser.sh
+  ./scripts/install-filebrowser.sh 192.168.1.10 pi mypassword
+  RASP_HOST=pi.local RASP_USER=pi RASP_PASS=secret ./scripts/install-filebrowser.sh
 HELP
 }
 
