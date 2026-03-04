@@ -95,27 +95,7 @@ This setup uses and builds on the following projects:
 - **[labwc](https://labwc.github.io/)** – Wayland compositor used on the Pi for the picture frame session.
 - **[TheDigitalPictureFrame.com](https://www.thedigitalpictureframe.com/)** – Guides and community around Pi-based digital picture frames.
 
-## Repository layout
-
-| Path | Purpose |
-|------|--------|
-| `README.md` | This file – overview, usage, credits |
-| `LICENSE` | MIT license |
-| `SECURITY.md` | How to report security issues |
-| `CONTRIBUTING.md` | How to contribute (issues and pull requests) |
-| `scripts/setup-raspberry.sh` | Debian update, locale fix, set language (`-l it` etc.) |
-| `scripts/install-photo-frame.sh` | Installs Picframe, Samba, LightDM autologin, nightly apt; `-l` for locale |
-| `scripts/install-filebrowser.sh` | Installs FileBrowser (web file manager) |
-| `docs/adding-photos.md` | How to add photos – **English** (template: replace placeholders) |
-| `docs/come-aggiungere-foto.md` | Come aggiungere foto – **Italiano** (template: sostituisci i segnaposto) |
-| `docs/how-it-works.md` | How Picframe + FileBrowser work – **English** |
-| `docs/come-funziona.md` | Come funzionano Picframe + FileBrowser – **Italiano** |
-| `docs/github-setup.md` | Repo settings (branch protection, no wiki/projects) |
-| `.env.example` | Env template – copy to `.env` and fill in |
-
-## Contributing
-
-We use **issues** for bugs and ideas and **pull requests** for changes. Pushes to `main` go through PRs (branch protected). See [CONTRIBUTING.md](CONTRIBUTING.md).
+Contributing: see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
