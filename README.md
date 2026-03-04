@@ -102,7 +102,13 @@ This setup uses and builds on the following projects:
 | `scripts/install-filebrowser.sh` | Installs FileBrowser (web file manager) |
 | `docs/raspberry-screensaver-plan.md` | Planning notes and options (photos-only, no video) |
 | `docs/COME-AGGIUNGERE-FOTO.md` | **Template** instructions for end users (replace placeholders) |
+| `CONTRIBUTING.md` | How to contribute (issues and pull requests) |
+| `scripts/setup-github.sh` | Apply repo settings with \`gh\` (disable wiki/projects, protect \`main\`) |
 | `.env.example` | Env template – copy to `.env` and fill in |
+
+## Contributing
+
+We use **issues** for bugs and ideas and **pull requests** for changes. To apply repo settings (disable wiki, protect `main`, require PRs), run from repo root: `./scripts/setup-github.sh` (requires [gh](https://cli.github.com/) auth). See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
