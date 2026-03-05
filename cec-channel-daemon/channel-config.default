@@ -1,0 +1,16 @@
+# CEC channel switcher config (channel-to-app mapping)
+# Copy to ~/.config/tvbox/channel-config on the Pi.
+# Format: N=app_id, optional N_start=command to run if window not found.
+# Context keys: N_left=cmd, N_right=cmd (runs 'cmd' when channel N is active).
+# Remote: number keys 1–9 jump to channel; channel up/down rotate through these.
+# Add more channels or run app scripts (e.g. install-weather-channel.sh).
+#
+# Channel 1: Picframe (no start; assumed in labwc autostart)
+1=picframe
+# Send left/right arrow keys to the Wayland window to change pictures
+1_left=wtype -k Left
+1_right=wtype -k Right
+#
+# Optional channel 2 (weather). Uncomment and adjust, or run: ./scripts/install-weather-channel.sh
+2=chromium
+2_start=chromium --password-store=basic --ozone-platform=wayland --kiosk --no-first-run --disable-notifications "https://weather.com/it-IT/weather/today/l/ac62971b2c4f0f50f695957dac2a69b7659a3929da214c6ca42a00d9fd766a6e"

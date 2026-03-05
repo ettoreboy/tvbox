@@ -3,10 +3,6 @@
 # Run from your computer. Requires: sshpass (or use SSH keys and adapt).
 set -e
 
-LOCALE_MAP() {
-  case "$1" in it) echo "it_IT.UTF-8" ;; en) echo "en_US.UTF-8" ;; de) echo "de_DE.UTF-8" ;; fr) echo "fr_FR.UTF-8" ;; es) echo "es_ES.UTF-8" ;; pt) echo "pt_PT.UTF-8" ;; nl) echo "nl_NL.UTF-8" ;; *) echo "en_US.UTF-8" ;; esac
-}
-
 show_help() {
   cat << 'HELP'
 Usage:
@@ -14,37 +10,38 @@ Usage:
   Or use env: RASP_HOST, RASP_USER, RASP_PASS
 
 Options:
-  -h, --help              Show this help
-  -l, --language CODE     Picframe locale (default: en). Codes: it, en, de, fr, es, pt, nl
+  -h, --help    Show this help
 
 Examples:
-  ./scripts/install-photo-frame.sh --language it 192.168.1.10 pi mypassword
-  RASP_HOST=pi.local RASP_USER=pi RASP_PASS=secret ./scripts/install-photo-frame.sh -l it
+  ./scripts/install-photo-frame.sh 192.168.1.10 pi mypassword
+  RASP_HOST=pi.local RASP_USER=pi RASP_PASS=secret ./scripts/install-photo-frame.sh
+  # Or use .env from repo root: RASP_HOST, RASP_USER, RASP_PASS
 HELP
 }
 
-LANG_CODE="en"
 while [ $# -gt 0 ]; do
   case "$1" in
     -h|--help) show_help; exit 0 ;;
-    -l|--language) LANG_CODE="${2:-en}"; shift 2 ;;
-    --language=*) LANG_CODE="${1#*=}"; shift ;;
     *) break ;;
   esac
 done
+
+# Load .env from repo root if present (same as install-cec-channel.sh)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+[[ -f "$REPO_ROOT/.env" ]] && source "$REPO_ROOT/.env"
 
 RASP_HOST="${RASP_HOST:-${1}}"
 RASP_USER="${RASP_USER:-${2}}"
 RASP_PASS="${RASP_PASS:-${3}}"
 HOME_PI="/home/${RASP_USER}"
-PICFRAME_LOCALE=$(LOCALE_MAP "$LANG_CODE")
 
 if [ -z "$RASP_HOST" ] || [ -z "$RASP_USER" ] || [ -z "$RASP_PASS" ]; then
   echo "Error: need HOST, USER, and PASSWORD (env or positional args)."
   echo ""; show_help; exit 1
 fi
 
-echo "=== Picframe (photos-only) install → ${RASP_USER}@${RASP_HOST} (locale: ${PICFRAME_LOCALE}) ==="
+echo "=== Picframe (photos-only) install → ${RASP_USER}@${RASP_HOST} ==="
 
 run_remote() {
   sshpass -p "$RASP_PASS" ssh -T -o StrictHostKeyChecking=accept-new -o ConnectTimeout=15 "${RASP_USER}@${RASP_HOST}" "$@"
@@ -61,8 +58,8 @@ echo "2. Enabling user linger..."
 run_remote "sudo loginctl enable-linger ${RASP_USER}"
 
 echo ""
-echo "3. Installing packages (libsdl2, Wayland, labwc, Samba)..."
-run_remote 'sudo apt-get update -y && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y git libsdl2-dev xwayland labwc wlr-randr samba udiskie udisks2'
+echo "3. Installing packages (libsdl2, Wayland, labwc, LightDM, Samba)..."
+run_remote 'sudo apt-get update -y && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y git libsdl2-dev xwayland labwc lightdm wlr-randr samba udiskie udisks2'
 
 echo ""
 echo "4. Enabling nightly apt auto-updates (3:00 AM)..."
@@ -99,18 +96,30 @@ echo "7. Creating Python venv and installing picframe..."
 run_remote "python3 -m venv ${HOME_PI}/venv_picframe && ${HOME_PI}/venv_picframe/bin/pip install --break-system-packages picframe 2>/dev/null || ${HOME_PI}/venv_picframe/bin/pip install picframe"
 
 echo ""
-echo "8. Initializing picframe config..."
+echo "8. Patching pi3d for Wayland app_id (picframe) so CEC channel switcher can focus it..."
+run_remote 'PF="${HOME_PI}/venv_picframe/lib/python3.13/site-packages/pi3d/util/DisplayOpenGL.py"
+if [ -f "$PF" ] && ! grep -q "SDL_VIDEO_WAYLAND_WMCLASS" "$PF" 2>/dev/null; then
+  perl -i -0pe "s/(import sdl2\n)(      stat = sdl2\.SDL_Init)/$1      sdl2.SDL_SetHint(b\"SDL_VIDEO_WAYLAND_WMCLASS\", b\"picframe\")\n$2/s" "$PF"
+  echo "   Patched pi3d DisplayOpenGL.py (Wayland app_id=picframe)"
+else
+  echo "   pi3d already patched or file not found"
+fi'
+
+echo ""
+echo "9. Initializing picframe config..."
 run_remote "printf '\n\n\n' | ${HOME_PI}/venv_picframe/bin/picframe -i ${HOME_PI}/ 2>/dev/null || true"
 
 echo ""
-echo "9. Enabling HTTP web UI and locale ${PICFRAME_LOCALE} in configuration.yaml..."
-run_remote 'CFG='"${HOME_PI}"'/picframe_data/config/configuration.yaml; sed -i "s|pic_dir:.*|pic_dir: \"'"${HOME_PI}"'/Pictures\"|" "$CFG"; sed -i "s/locale:.*/locale: '"${PICFRAME_LOCALE}"'/" "$CFG"; sed -i "s/use_http:.*/use_http: True/" "$CFG"; sed -i "s/port:.*/port: 9000/" "$CFG"; sed -i "s/display_w:.*/display_w: null/" "$CFG"; sed -i "s/display_h:.*/display_h: null/" "$CFG"; grep -q "use_http: True" "$CFG" || echo -e "\nhttp:\n  use_http: True\n  port: 9000" >> "$CFG"; grep -q "display_w:" "$CFG" || echo -e "\nviewer:\n  display_w: null\n  display_h: null" >> "$CFG"'
+echo "10. Pointing Picframe at Pictures folder and enabling web UI (port 9000)..."
+run_remote 'CFG='"${HOME_PI}"'/picframe_data/config/configuration.yaml; sed -i "s|pic_dir:.*|pic_dir: \"'"${HOME_PI}"'/Pictures\"|" "$CFG"; sed -i "s/use_http:.*/use_http: True/" "$CFG"; sed -i "s/port:.*/port: 9000/" "$CFG"; grep -q "use_http: True" "$CFG" || echo -e "\nhttp:\n  use_http: True\n  port: 9000" >> "$CFG"'
 
 echo ""
-echo "10. Creating start_picframe.sh and labwc autostart..."
+echo "11. Creating start_picframe.sh and labwc autostart..."
 run_remote "cat > ${HOME_PI}/start_picframe.sh << 'STARTEOF'
 #!/bin/bash
 source ~/venv_picframe/bin/activate
+# Wayland app_id for wlrctl focus (CEC channel switcher)
+export SDL_VIDEO_WAYLAND_WMCLASS=picframe
 picframe &
 STARTEOF
 chmod +x ${HOME_PI}/start_picframe.sh"
@@ -122,6 +131,14 @@ run_remote "cat > ${HOME_PI}/.config/labwc/rc.xml << 'RCEOF'
     <windowRule identifier=\"*\" serverDecoration=\"no\" />
     <windowRule identifier=\"*\">
       <action name=\"Maximize\" direction=\"both\"/>
+    </windowRule>
+    <!-- labwc black terminal (WL-1) - keep below picframe -->
+    <windowRule identifier=\"labwc\" title=\"*WL*\">
+      <action name=\"ToggleLayerBelow\"/>
+    </windowRule>
+    <!-- keyring password prompt - keep below -->
+    <windowRule identifier=\"gcr-prompter\" title=\"*\">
+      <action name=\"ToggleLayerBelow\"/>
     </windowRule>
 </windowRules>
 RCEOF"
@@ -137,14 +154,29 @@ Restart=always
 WantedBy=default.target
 SVCEOF"
 echo ""
-echo "11. Configuring LightDM autologin..."
-run_remote 'if command -v lightdm >/dev/null 2>&1; then sudo mkdir -p /etc/lightdm/lightdm.conf.d && echo "[Seat:*]
+echo "12. Configuring LightDM autologin (no login screen on boot)..."
+PI_UID=$(run_remote "id -u ${RASP_USER}" | tr -d '\r\n')
+run_remote 'sudo mkdir -p /etc/lightdm/lightdm.conf.d && echo "[Seat:*]
 autologin-user='"${RASP_USER}"'
-autologin-session=labwc" | sudo tee /etc/lightdm/lightdm.conf.d/90-autologin.conf > /dev/null && sudo chmod 644 /etc/lightdm/lightdm.conf.d/90-autologin.conf && systemctl --user disable picframe.service 2>/dev/null; echo "LightDM autologin set."; else systemctl --user enable picframe.service 2>/dev/null; echo "No LightDM; enabled picframe user service."; fi'
+autologin-session=labwc" | sudo tee /etc/lightdm/lightdm.conf.d/90-autologin.conf > /dev/null && sudo chmod 644 /etc/lightdm/lightdm.conf.d/90-autologin.conf && export XDG_RUNTIME_DIR=/run/user/'"${PI_UID}"' && (systemctl --user stop picframe.service 2>/dev/null || true) && (systemctl --user disable picframe.service 2>/dev/null || true) && echo "   LightDM autologin set, old user service disabled."'
 
 echo ""
-echo "12. Done. Reboot the Pi to start the picture frame."
+echo "13. Starting picframe (if display already up)..."
+PI_UID=$(run_remote "id -u ${RASP_USER}" | tr -d '\r\n')
+run_remote 'if pgrep -u '"${PI_UID}"' labwc >/dev/null 2>&1 && ! pgrep -f "picframe" >/dev/null 2>&1; then
+  cd ~ && source venv_picframe/bin/activate && SDL_VIDEO_WAYLAND_WMCLASS=picframe nohup picframe > /tmp/picframe.log 2>&1 &
+  sleep 3
+  pgrep -f picframe >/dev/null && echo "   Picframe started." || echo "   Picframe may have failed; check /tmp/picframe.log"
+fi
+if pgrep -u '"${PI_UID}"' labwc >/dev/null 2>&1; then
+  WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/user/'"${PI_UID}"' wlrctl toplevel minimize app_id:labwc 2>/dev/null || true
+  WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/user/'"${PI_UID}"' wlrctl toplevel focus app_id:python3.13 2>/dev/null || WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/user/'"${PI_UID}"' wlrctl toplevel focus app_id:picframe 2>/dev/null || true
+  echo "   Brought picframe to front (minimized labwc terminal)."
+fi'
+
+echo ""
+echo "14. Done."
 echo "    Web UI: http://${RASP_HOST}:9000"
 echo "    Photos: Samba \\\\${RASP_HOST}\\\\${RASP_USER} or scp to ${RASP_USER}@${RASP_HOST}:~/Pictures/"
-echo "    Reboot: ssh ${RASP_USER}@${RASP_HOST} 'sudo reboot'"
+echo "    If picframe did not start: ssh ${RASP_USER}@${RASP_HOST} '~/start_picframe.sh' or reboot"
 echo "=== Done ==="

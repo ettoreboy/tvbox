@@ -1,0 +1,13 @@
+[Unit]
+Description=CEC channel switcher (TV remote -> Wayland focus)
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 %h/.local/bin/cec-channel.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

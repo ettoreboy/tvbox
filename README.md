@@ -37,6 +37,9 @@ Or pass them when running a script:
 ./scripts/setup-raspberry.sh [OPTIONS] [HOST] [USER] [PASSWORD]
 ./scripts/install-photo-frame.sh [OPTIONS] [HOST] [USER] [PASSWORD]
 ./scripts/install-filebrowser.sh [OPTIONS] [HOST] [USER] [PASSWORD]
+./scripts/install-cec-channel.sh [OPTIONS] [HOST] [USER] [PASSWORD]
+./scripts/install-weather-channel.sh [OPTIONS] [HOST] [USER] [PASSWORD]
+./scripts/change-splash.sh [IMAGE_PATH] [HOST] [USER] [PASSWORD]
 ```
 
 All scripts support `-h` or `--help`. Setup and photo-frame support `-l` / `--language CODE` (e.g. `it`, `en`, `de`, `fr`, `es`, `pt`, `nl`; default `en`).
@@ -68,7 +71,19 @@ Adds a web UI to upload/manage files (port 8080). First user is created with the
 ./scripts/install-filebrowser.sh
 ```
 
-**4. Reboot the Pi** so the picture frame and (if used) LightDM autologin and FileBrowser start correctly.
+**4. (Optional) Install CEC channel switcher**  
+Use the TV remote (HDMI CEC) to switch “channels”: number keys 1, 2, … or channel up/down to rotate between configured full-screen apps (e.g. Picframe, weather). See [docs/cec-channel-switcher.md](docs/cec-channel-switcher.md). For the weather channel (key 2), run `install-weather-channel.sh` after the CEC install.
+
+```bash
+./scripts/install-cec-channel.sh
+./scripts/install-weather-channel.sh          # optional: add channel 2 (weather, Lana/Bolzano)
+./scripts/install-weather-channel.sh -l Milan  # optional: other location
+```
+
+**5. Reboot the Pi** so the picture frame and (if used) LightDM autologin, FileBrowser, and CEC daemon start correctly.
+
+**6. (Optional) Custom boot splash**  
+Put a PNG in `splash/splash.png` (e.g. 1920×1080), then run `./scripts/change-splash.sh`. Reboot the Pi to see it.
 
 ## After installation
 
