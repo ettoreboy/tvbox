@@ -8,6 +8,9 @@ Simple setup to turn a **Raspberry Pi** (connected to a TV) into a **photo slide
 - **LightDM autologin** – no login screen on boot
 - **Nightly apt updates** – automatic at 3:00 AM
 
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/d4b5a55a-e511-41d4-ba2c-474fd319a52e" />
+
+
 Scripts run from your machine (Mac/Linux) via SSH. Credentials via env vars or arguments.
 
 ## Requirements
